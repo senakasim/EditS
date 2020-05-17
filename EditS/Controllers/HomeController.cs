@@ -52,14 +52,14 @@ namespace EditS.Controllers
 
 
         /// <summary>
-        /// Gelen dosyları istatistiksel olarak değerlendirir.Json tipinde sonuç döndürür.
+        /// Gelen dosyaları istatistiksel olarak değerlendirir.Json tipinde sonuç döndürür.
         /// </summary>
         /// <param name="url">Birden fazla csv dosya yolu </param>
         /// <returns>Json türünde değer verir.</returns>
         [HttpGet]
         public JObject evaluation([FromUri] List<String> url )
         {
-            DataTable sonuc = new DataTable();
+            DataTable totalTable = new DataTable();
             for(int i=0;i<url.Count;i++)
             {
                 DataTable dt = new DataTable();
@@ -67,11 +67,11 @@ namespace EditS.Controllers
                 dt = CsvToDataTable(url[i]);
                 if( url.Count>1)
                     {
-                    sonuc.Merge(dt);
+                    totalTable.Merge(dt);
                     }
                 else
                 {
-                    sonuc = dt;
+                    totalTable = dt;
                 }
             }
                       
@@ -81,63 +81,63 @@ namespace EditS.Controllers
             string sortOrder; // sıralama
 
             //Hangi politikaci 2013 senesinde en fazla kelimeyi kullanmistir?
-            #region Soru 1 
-            string cevap1 = "";
+            #region Question 1 
+            string answer1 = "";
             try
             {
                 expression = "(tarih >= #1/1/2013# AND tarih <=#12/31/2013#)";
                 sortOrder = "KelimeSayisi desc";
 
-                DataRow[] result = sonuc.Select(expression, sortOrder);
-                cevap1 = result[0][0].ToString();
+                DataRow[] result = totalTable.Select(expression, sortOrder);
+                answer1 = result[0][0].ToString();
               
             }
             catch
             {
-                cevap1 = "null";
+                answer1 = "null";
             }
             #endregion
 
             //Hangi politikaci "Güvenlik" hakkinda en fazla kelimeyi kullanmistir?
-            #region Soru 2
-            string cevap2 = "";
+            #region Question 2
+            string answer2 = "";
             try
             {
                 expression = "(konu='Güvenlik')";
                 sortOrder = "KelimeSayisi desc";
 
-                DataRow[] result = sonuc.Select(expression, sortOrder);
-                cevap2 = result[0][0].ToString();
+                DataRow[] result = totalTable.Select(expression, sortOrder);
+                answer2 = result[0][0].ToString();
 
             }
             catch
             {
-                cevap2 = "null";
+                answer2 = "null";
             }
             #endregion
 
             //Hangi politikaci en az kelimeyi kullanmistir?
-            #region Soru 3
-            string cevap3 = "";
+            #region Question 3
+            string answer3 = "";
             try
             {
                 expression = "(KelimeSayisi=MIN(KelimeSayisi))";
                 sortOrder = "";
 
-                DataRow[] result = sonuc.Select(expression, sortOrder);
-                cevap3 = result[0][0].ToString();
+                DataRow[] result = totalTable.Select(expression, sortOrder);
+                answer3 = result[0][0].ToString();
 
             }
             catch
             {
-                cevap3 = "null";
+                answer3 = "null";
             }
             #endregion
 
             JObject json = new JObject();
-            json.Add("mostSpeeches", cevap1);
-            json.Add("mostSecurity", cevap2);
-            json.Add("leastWordy", cevap3);
+            json.Add("mostSpeeches", answer1);
+            json.Add("mostSecurity", answer2);
+            json.Add("leastWordy", answer3);
             return json;
         }
 
